@@ -212,35 +212,72 @@ class BrandValidator:
 
 
 def load_guidelines_from_json(filepath: str) -> BrandGuidelines:
-    """Load brand guidelines from JSON file"""
-    with open(filepath, 'r') as f:
-        data = json.load(f)
-    return BrandGuidelines(**data)
+    """
+    Load brand guidelines from JSON file
+
+    Args:
+        filepath: Path to JSON file containing brand guidelines
+
+    Returns:
+        BrandGuidelines object
+
+    Raises:
+        FileNotFoundError: If the file doesn't exist
+        json.JSONDecodeError: If the file contains invalid JSON
+        TypeError: If required fields are missing
+    """
+    try:
+        with open(filepath, 'r') as f:
+            data = json.load(f)
+        return BrandGuidelines(**data)
+    except FileNotFoundError:
+        raise FileNotFoundError(f"Brand guidelines file not found: {filepath}")
+    except json.JSONDecodeError as e:
+        raise json.JSONDecodeError(
+            f"Invalid JSON in brand guidelines file: {e.msg}", e.doc, e.pos
+        )
+    except TypeError as e:
+        raise TypeError(f"Missing required fields in brand guidelines: {e}")
+
+
+def get_acme_corporation_guidelines() -> BrandGuidelines:
+    """
+    Get default Acme Corporation brand guidelines.
+
+    These guidelines match the standards defined in the SKILL.md reference.
+    Users should customize these for their own organization.
+
+    Returns:
+        BrandGuidelines object with Acme Corporation standards
+    """
+    return BrandGuidelines(
+        brand_name="Acme Corporation",
+        primary_colors=["#0066CC", "#003366", "#FFFFFF"],  # Acme Blue, Acme Navy, White
+        secondary_colors=["#28A745", "#FFC107", "#DC3545", "#6C757D", "#F8F9FA"],  # Success Green, Warning Amber, Error Red, Neutral Gray, Light Gray
+        fonts=["Segoe UI", "system-ui", "-apple-system", "sans-serif"],
+        tone_keywords=["innovation", "excellence", "professional", "solutions", "trusted", "reliable"],
+        prohibited_words=["cheap", "outdated", "inferior", "unprofessional", "sloppy"],
+        tagline="Innovation Through Excellence"
+    )
 
 
 def main():
-    """Example usage"""
-    # Example brand guidelines
-    guidelines = BrandGuidelines(
-        brand_name="Acme Corp",
-        primary_colors=["#FF6B6B", "#4ECDC4", "#45B7D1"],
-        secondary_colors=["#FFA07A", "#98D8C8"],
-        fonts=["Helvetica Neue", "Arial", "Roboto"],
-        tone_keywords=["innovative", "reliable", "customer-focused", "excellence", "trusted"],
-        prohibited_words=["cheap", "outdated", "basic", "inferior"],
-        tagline="Innovation You Can Trust"
-    )
-    
-    # Example content to validate
+    """Example usage demonstrating brand validation"""
+    # Load Acme Corporation brand guidelines
+    # Users should customize this for their own organization
+    guidelines = get_acme_corporation_guidelines()
+
+    # Example content to validate (intentionally contains violations for demonstration)
     test_content = """
-    Welcome to acme corp!
-    
-    We are a cheap solution provider.
-    
-    Our innovative and reliable services are customer-focused.
-    
+    Welcome to acme corporation!
+
+    We are a cheap solution provider with outdated technology.
+
+    Our innovation and excellence in professional solutions are trusted by many.
+
     Contact us at: font-family: 'Comic Sans MS'
     Color scheme: #FF0000
+    Background: rgb(255, 0, 0)
     """
     
     # Validate
